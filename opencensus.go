@@ -20,10 +20,9 @@ func Middleware(config *Config) gin.HandlerFunc {
 		defer span.End()
 		c.Set("span", span)
 		c.Next()
-		s := c.GetHeader("status")
-		status, _ := strconv.Atoi(s)
+		status := c.Writer.Status()
 		if status >= 400 {
-			span.AddAttributes(trace.StringAttribute("error.msg", s))
+			span.AddAttributes(trace.StringAttribute("error.msg", strconv.Itoa(status)))
 		}
 	})
 }
