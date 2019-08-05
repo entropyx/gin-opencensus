@@ -2,6 +2,7 @@ package opencensus
 
 import (
 	"fmt"
+	"strconv"
 
 	propagation "github.com/entropyx/opencensus-propagation"
 	"github.com/entropyx/soul/env"
@@ -19,6 +20,11 @@ func Middleware(config *Config) gin.HandlerFunc {
 		defer span.End()
 		c.Set("span", span)
 		c.Next()
+		s := c.GetHeader("status")
+		status, _ := strconv.Atoi(s)
+		if status >= 400 {
+			span.AddAttributes(trace.StringAttribute("error.msg", s))
+		}
 	})
 }
 
