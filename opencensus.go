@@ -12,6 +12,26 @@ import (
 
 type Config struct{}
 
+var statusList = map[int]int32{
+	200: 0,
+	499: 1,
+	// 500: 2,
+	400: 3,
+	504: 4,
+	404: 5,
+	409: 6,
+	403: 7,
+	429: 8,
+	// 400: 9,
+	// 409: 10,
+	// 400: 11,
+	501: 12,
+	500: 13,
+	503: 14,
+	// 500: 15,
+	401: 16,
+}
+
 func Middleware(config *Config) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		request := c.Request
@@ -32,6 +52,7 @@ func addHTTP(c *gin.Context, span *trace.Span) {
 	status := strconv.Itoa(s)
 	if s >= 400 {
 		span.AddAttributes(trace.StringAttribute("error.msg", status))
+		span.SetStatus(trace.Status{Code: statusList[s]})
 	}
 	span.AddAttributes(trace.StringAttribute("http.url", request.URL.Path))
 	span.AddAttributes(trace.StringAttribute("http.method", request.Method))
